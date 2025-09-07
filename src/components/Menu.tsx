@@ -1,7 +1,10 @@
 const Menu = ({ state, onClose }) => {
   return (
     <>
-      <div className="sidebar sidebar-left" style={{ transform: `translateX(${state * -105}%)` }}>
+      <div
+        className="sidebar sidebar-left"
+        style={{ transform: `translateX(${state ? 0 : -105}%)` }}
+      >
         <button id="MenuCloserBtn" className="closer-btn" onClick={onClose}>
           <i className="msr icon--cancel"> cancel </i>
         </button>
@@ -25,7 +28,7 @@ const Menu = ({ state, onClose }) => {
       <div
         id="MenuBackdrop"
         className="backdrop menu-backdrop"
-        style={{ display: `${state === 1 ? "none" : "block"}` }}
+        style={{ display: `${state ? "block" : "none"}` }}
         onClick={onClose}
       ></div>
     </>

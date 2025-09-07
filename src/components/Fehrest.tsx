@@ -24,20 +24,23 @@ const Fehrest = ({ state, onClose }) => {
 
   const handleBackdrop = () => {
     if (isSmallScreen) {
-      return state === 0 ? "block" : "none";
+      return state ? "block" : "none";
     }
     return "none";
   };
 
   return (
     <>
-      <div className="sidebar sidebar-right" style={{ transform: `translateX(${state * +105}%)` }}>
+      <div
+        className="sidebar sidebar-right"
+        style={{ transform: `translateX(${state ? 0 : 105}%)` }}
+      >
         <button id="FehrestCloserBtn" className="closer-btn" onClick={onClose}>
           <i className="msr icon--cancel"> cancel </i>
         </button>
         <div className="fehrest-section">
           <header className="fehrest-header">
-            <label for="BookSelector" className="book-selector-label">
+            <label htmlFor="BookSelector" className="book-selector-label">
               فهرست کتاب
             </label>
             <select id="BookSelector" name="BookSelector" className="book-selector"></select>
