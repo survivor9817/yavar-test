@@ -5,12 +5,17 @@ import Quiz from "./Quiz";
 import Yavar from "./Yavar";
 import { useState } from "react";
 import TabBtn from "./TabBtn";
+import SidebarBtn from "./SidebarBtn";
+import TabIndicator from "./TabIndicator";
+import { useMediaQuery } from "../hooks/useMediaQuery";
+import Backdrop from "./Backdrop";
 
 const Layout = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [isFehrestOpen, setIsFehrestOpen] = useState(false); // 1 is closed, 0 is open
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [wasFehrestOpen, saveFehrestState] = useState(false);
+  const isSmallScreen = useMediaQuery("(max-width: 1440px)");
 
   function toggleFehrest() {
     setActiveTab(0);
@@ -23,7 +28,7 @@ const Layout = () => {
 
   function goToBook() {
     setActiveTab(0);
-    if (wasFehrestOpen) setIsFehrestOpen(true);
+    wasFehrestOpen && setIsFehrestOpen(true);
     saveFehrestState(false);
   }
 
@@ -39,45 +44,41 @@ const Layout = () => {
     setActiveTab(2);
   }
 
-  const styles = {
-    tabBtn: `flex flex-row max-[600px]:flex-col justify-center items-center h-14 w-16 cursor-pointer transition-colors hover:bg-[#ddd]`,
-    tabBtnLabel: `text-[16px] max-[600px]:text-[14px] mr-2 max-[600px]:mr-0`,
-    tabIndicator: `absolute bottom-0 right-0 max-[600px]:top-0 w-1/3 h-1 bg-blue-400 transition-transform ease-out duration-300 rounded-4xl`,
-  };
-
   return (
     <>
-      <Fehrest state={isFehrestOpen} onClose={() => setIsFehrestOpen(false)} />
-      <Menu state={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
+      <Fehrest
+        style={{ transform: `translateX(${isFehrestOpen ? 0 : 105}%)` }}
+        onClose={() => setIsFehrestOpen(false)}
+      />
+      <Backdrop
+        className={"z-[65] opacity-25"}
+        style={{ display: isFehrestOpen && isSmallScreen ? "block" : "none" }}
+        onClick={() => setIsFehrestOpen(false)}
+      />
+
+      <Menu
+        style={{ transform: `translateX(${isMenuOpen ? 0 : -105}%)` }}
+        onClose={() => setIsMenuOpen(false)}
+      />
+      <Backdrop
+        className={"z-[80] opacity-50"}
+        style={{ display: isMenuOpen ? "block" : "none" }}
+        onClick={() => setIsMenuOpen(false)}
+      />
 
       <div className="m-auto max-w-[840px] min-w-[320px] overflow-hidden flex flex-col max-[600px]:flex-col-reverse">
         <div className="flex bg-[#eee] overflow-hidden">
-          <button className={`${styles.tabBtn}`} onClick={() => toggleFehrest()}>
-            <i className="msr text-[36px] scale-x-[-1]"> list </i>
-            <span className="hidden max-[600px]:block text-[14px]">فهرست</span>
-          </button>
-
+          <SidebarBtn label={"فهرست"} icon={"list"} iconSize={"text-4xl"} onClick={toggleFehrest} />
           <div className="flex flex-grow relative">
             <TabBtn label={"کتاب"} icon={"menu_book"} onClick={() => goToBook()} />
             <TabBtn label={"تمرین"} icon={"exercise"} onClick={() => goToQuiz()} />
             <TabBtn label={"یاور"} icon={"school"} onClick={() => goToYavar()} />
-            <div
-              id="TabIndicator"
-              className={`${styles.tabIndicator}`}
-              style={{ transform: `translateX(${activeTab * -100}%)` }}
-            ></div>
+            <TabIndicator style={{ transform: `translateX(${activeTab * -100}%)` }} />
           </div>
-
-          <button className={`${styles.tabBtn}`} onClick={() => toggleMenu()}>
-            <i className="msr text-[30px] scale-x-[-1]"> menu </i>
-            <span className="hidden max-[600px]:block text-[14px]">منو</span>
-          </button>
+          <SidebarBtn label={"منو"} icon={"menu"} iconSize={"text-3xl"} onClick={toggleMenu} />
         </div>
 
-        <div
-          className="tabs-container"
-          style={{ transform: `translateX(${activeTab * (100 / 3)}%)` }}
-        >
+        <div className="tabs" style={{ transform: `translateX(${activeTab * (100 / 3)}%)` }}>
           <Book />
           <Quiz />
           <Yavar />

@@ -110,7 +110,7 @@
 }
 
 /* tabs container */
-.tabs-container {
+.tabs {
   display: flex;
   flex-direction: row;
   transition: transform 0.3s ease;

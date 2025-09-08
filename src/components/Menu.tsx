@@ -1,13 +1,11 @@
-const Menu = ({ state, onClose }) => {
+import CloseBtn from "./CloseBtn";
+
+const Menu = ({ style, onClose }) => {
   return (
     <>
-      <div
-        className="sidebar sidebar-left"
-        style={{ transform: `translateX(${state ? 0 : -105}%)` }}
-      >
-        <button id="MenuCloserBtn" className="closer-btn" onClick={onClose}>
-          <i className="msr icon--cancel"> cancel </i>
-        </button>
+      <div className="sidebar sidebar-left" style={style}>
+        <CloseBtn onClick={onClose} />
+
         <div className="menu-section">
           <img src="./imgs/reza.jpg" alt="user-img" className="user-img" />
           <div className="user-name">رضا قزلسفلو</div>
@@ -23,14 +21,6 @@ const Menu = ({ state, onClose }) => {
           </ul>
         </div>
       </div>
-      <div id="MenuBackdrop" className="backdrop menu-backdrop"></div>
-
-      <div
-        id="MenuBackdrop"
-        className="backdrop menu-backdrop"
-        style={{ display: `${state ? "block" : "none"}` }}
-        onClick={onClose}
-      ></div>
     </>
   );
 };
