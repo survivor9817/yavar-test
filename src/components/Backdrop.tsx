@@ -1,4 +1,4 @@
-const Backdrop = ({ className, onClick, style }) => {
+const Backdrop = ({ className = ``, onClick, style }) => {
   return (
     <div
       className={`hidden w-screen h-screen fixed bg-black ${className}`}
