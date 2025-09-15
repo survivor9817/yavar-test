@@ -359,9 +359,6 @@ p {
 }
 
 .book-selector {
-  /* appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none; */
   cursor: pointer;
   border: 1px solid #838383;
   width: 100%;
@@ -369,7 +366,6 @@ p {
   padding-right: 8px;
   margin-bottom: 16px;
   font-size: 18px;
-  /* text-align: center; */
   border-radius: 6px;
   font-weight: bold;
   background-color: transparent;
@@ -396,7 +392,8 @@ p {
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: 16px;
-  padding: 8px 8px;
+  padding: 5px 8px;
+  /* height: 34px; */
 }
 
 .fehrest-list div {

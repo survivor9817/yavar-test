@@ -1,21 +1,21 @@
 import { useState } from "react";
 import { useMediaQuery } from "../hooks/useMediaQuery";
+import SidebarBtn from "./SidebarBtn";
+import TabBtn from "./TabBtn";
 import Fehrest from "./Fehrest";
 import Menu from "./Menu";
+import Backdrop from "./Backdrop";
+import TabIndicator from "./TabIndicator";
 import Book from "./Book";
 import Quiz from "./Quiz";
 import Yavar from "./Yavar";
-import TabBtn from "./TabBtn";
-import SidebarBtn from "./SidebarBtn";
-import TabIndicator from "./TabIndicator";
-import Backdrop from "./Backdrop";
+import { booksData } from "../data/booksData.js";
 
 const Layout = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [isFehrestOpen, setIsFehrestOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [wasFehrestOpen, saveFehrestState] = useState(false);
-
   const isSmallScreen = useMediaQuery("(max-width: 1440px)");
 
   const styles = {
@@ -62,9 +62,26 @@ const Layout = () => {
     setActiveTab(2);
   }
 
+  const [currentBookName, setCurrentBookName] = useState(Object.keys(booksData)[0]);
+  const [currentFehrest, setCurrentFehrest] = useState(booksData[currentBookName].fehrest);
+  const [currentContent, setCurrentContent] = useState(booksData[currentBookName].content);
+
+  function updateBook(event) {
+    const newBookName = event.target.value;
+    setCurrentBookName(newBookName);
+    setCurrentFehrest(booksData[newBookName].fehrest);
+    setCurrentContent(booksData[newBookName].content);
+  }
+
   return (
     <>
-      <Fehrest style={styles.fehrest} onClose={closeFehrest} />
+      <Fehrest
+        style={styles.fehrest}
+        onClose={closeFehrest}
+        onChange={updateBook}
+        bookName={currentBookName}
+        fehrest={currentFehrest}
+      />
       <Backdrop style={styles.fehrestBack} className={"z-[65] opacity-25"} onClick={closeFehrest} />
 
       <Menu style={styles.menu} onClose={closeMenu} />
@@ -83,7 +100,7 @@ const Layout = () => {
         </div>
 
         <div className="tabs" style={styles.tabsContainer}>
-          <Book />
+          <Book content={currentContent} />
           <Quiz />
           <Yavar />
         </div>
