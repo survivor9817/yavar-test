@@ -1,77 +1,127 @@
 import CloseBtn from "./CloseBtn";
 import { bookNames } from "../data/booksData.js";
+import { useEffect, useRef, useCallback, useMemo } from "react";
+import FehrestList from "./FehrestList.js";
 
-const Fehrest = ({ style, onClose, onChange, bookName, fehrest }) => {
+const Fehrest = ({ style, onClose, onChange, bookName, fehrest, setCurrentPageNumber }) => {
   const bookItems = bookNames.map((bookName) => (
     <option key={bookName} value={bookName}>
       {bookName}
     </option>
   ));
 
-  // تابع کمکی برای ساخت آیتم‌ها
-  const createFehrestItems = () => {
-    const items = [];
-    let i = 0;
+  const observerRef = useRef(null);
+  const lastRefPageRef = useRef(null);
+  const lastActivesRef = useRef([]);
+  const lastExpandedsRef = useRef([]);
 
-    while (i < fehrest.length) {
-      const item = fehrest[i];
-      const { id, refTitle, refPage, indent } = item;
+  // تابع کمکی برای toggle کلاس
+  const toggleClass = useCallback((el, className) => {
+    el?.classList.toggle(className);
+  }, []);
 
-      const isNewSection = indent === 0;
-      const isChapter = id.split("-").pop() === "0";
+  // پیدا کردن شماره صفحه مرجع
+  const fehrestPages = useMemo(() => fehrest.map((item) => item.refPage), [fehrest]);
+  const findRefTitlePageNumber = useCallback(
+    (pageNumber) => {
+      if (fehrestPages.includes(pageNumber)) return pageNumber;
+      return Math.max(...fehrestPages.filter((page) => page < pageNumber));
+    },
+    [fehrestPages]
+  );
 
-      const itemContent = (
-        <div
-          key={id}
-          data-ref-page={refPage}
-          data-id={id}
-          className={isChapter ? "chapter" : "article"}
-        >
-          {refTitle}
-        </div>
-      );
+  // آپدیت UI فهرست
+  const updateFehrestUI = useCallback(
+    (observingPageNumber) => {
+      const refPage = findRefTitlePageNumber(observingPageNumber);
+      if (refPage === lastRefPageRef.current) return;
+      lastRefPageRef.current = refPage;
 
-      if (isNewSection) {
-        // بررسی آیا آیتم‌های بعدی زیرمجموعه هستند
-        const subItems = [];
-        let j = i + 1;
+      // حذف کلاس‌های قبلی
+      lastActivesRef.current.forEach((el) => toggleClass(el, "active"));
+      lastExpandedsRef.current.forEach((el) => toggleClass(el, "expanded"));
 
-        while (j < fehrest.length && fehrest[j].indent > 0) {
-          const subItem = fehrest[j];
-          const subItemContent = (
-            <div
-              key={subItem.id}
-              data-ref-page={subItem.refPage}
-              data-id={subItem.id}
-              className={subItem.id.split("-").pop() === "0" ? "chapter" : "article"}
-            >
-              {subItem.refTitle}
-            </div>
-          );
+      // پیدا کردن عناصر جدید
+      const fehrestList = document.querySelector("#fehrestList");
+      if (!fehrestList) return;
+      const LI = fehrestList.querySelector(`div[data-ref-page="${refPage}"]`);
+      const siblingOL = LI?.nextElementSibling;
+      const parentOL = LI?.closest("ol.articles");
+      const higherLI = parentOL?.previousElementSibling;
 
-          subItems.push(<li key={subItem.id}>{subItemContent}</li>);
-          j++;
-        }
+      // ذخیره عناصر جدید
+      lastActivesRef.current = [LI, higherLI].filter(Boolean);
+      lastExpandedsRef.current = [parentOL, siblingOL].filter(Boolean);
 
-        if (subItems.length > 0) {
-          items.push(
-            <li key={id}>
-              {itemContent}
-              <ol className="articles">{subItems}</ol>
-            </li>
-          );
-        } else {
-          items.push(<li key={id}>{itemContent}</li>);
-        }
-
-        i = j; // پرش به آیتم بعدی که پردازش نشده
+      // اعمال کلاس‌های جدید
+      toggleClass(LI, "active");
+      if (siblingOL) {
+        toggleClass(siblingOL, "expanded");
       } else {
-        i++;
+        toggleClass(parentOL, "expanded");
+        toggleClass(higherLI, "active");
       }
+    },
+    [findRefTitlePageNumber, toggleClass]
+  );
+
+  // callback برای observer
+  const observerCallback = useCallback(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const observedPageNumber = +entry.target.id.replace("page", "");
+        setCurrentPageNumber(observedPageNumber);
+        updateFehrestUI(observedPageNumber);
+      });
+    },
+    [updateFehrestUI]
+  );
+
+  // راه‌اندازی Observer
+  useEffect(() => {
+    const observerOptions = {
+      root: document.querySelector(".book-section"),
+      rootMargin: "-49% 0% -49% 0%",
+      threshold: 0,
+    };
+
+    // ساخت observer
+    observerRef.current = new IntersectionObserver(observerCallback, observerOptions);
+
+    // observe کردن صفحات
+    const pagesToWatch = document.querySelectorAll(".book-section .page");
+    pagesToWatch.forEach((page) => observerRef.current.observe(page));
+
+    // cleanup
+    return () => {
+      if (observerRef.current) {
+        pagesToWatch.forEach((page) => observerRef.current.unobserve(page));
+        observerRef.current.disconnect();
+        console.log("Observer disconnected");
+      }
+    };
+  }, [fehrest, observerCallback]); // وقتی fehrest تغییر کنه دوباره راه‌اندازی شه
+
+  // مدیریت کلیک روی فهرست
+  useEffect(() => {
+    function scrollOnSection(event) {
+      const refPageTitle = event.target.closest("li div");
+      if (!refPageTitle) return;
+      const relatedPage = document.querySelector(`#page${refPageTitle.dataset.refPage}`);
+      if (!relatedPage) return;
+      relatedPage.scrollIntoView();
     }
 
-    return items;
-  };
+    const fehrestList = document.querySelector("#fehrestList");
+    if (!fehrestList) return;
+
+    fehrestList.addEventListener("click", scrollOnSection);
+
+    return () => {
+      fehrestList.removeEventListener("click", scrollOnSection);
+    };
+  }, []);
 
   return (
     <>
@@ -94,7 +144,7 @@ const Fehrest = ({ style, onClose, onChange, bookName, fehrest }) => {
             </select>
           </header>
           <ol id="fehrestList" className="fehrest-list">
-            {createFehrestItems()}
+            <FehrestList fehrestData={fehrest} />
           </ol>
         </div>
       </div>

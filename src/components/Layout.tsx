@@ -63,14 +63,14 @@ const Layout = () => {
   }
 
   const [currentBookName, setCurrentBookName] = useState(Object.keys(booksData)[0]);
-  const [currentFehrest, setCurrentFehrest] = useState(booksData[currentBookName].fehrest);
-  const [currentContent, setCurrentContent] = useState(booksData[currentBookName].content);
+  const [currentBook, setCurrentBook] = useState(booksData[currentBookName]);
+  const [currentPageNumber, setCurrentPageNumber] = useState(1);
 
   function updateBook(event) {
     const newBookName = event.target.value;
     setCurrentBookName(newBookName);
-    setCurrentFehrest(booksData[newBookName].fehrest);
-    setCurrentContent(booksData[newBookName].content);
+    setCurrentBook(booksData[newBookName]);
+    setCurrentPageNumber(1);
   }
 
   return (
@@ -80,7 +80,8 @@ const Layout = () => {
         onClose={closeFehrest}
         onChange={updateBook}
         bookName={currentBookName}
-        fehrest={currentFehrest}
+        fehrest={currentBook.fehrest}
+        setCurrentPageNumber={setCurrentPageNumber}
       />
       <Backdrop style={styles.fehrestBack} className={"z-[65] opacity-25"} onClick={closeFehrest} />
 
@@ -100,7 +101,11 @@ const Layout = () => {
         </div>
 
         <div className="tabs" style={styles.tabsContainer}>
-          <Book content={currentContent} />
+          <Book
+            content={currentBook.content}
+            currentPageNumber={currentPageNumber}
+            setCurrentPageNumber={setCurrentPageNumber}
+          />
           <Quiz />
           <Yavar />
         </div>
