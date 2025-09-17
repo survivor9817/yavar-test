@@ -1,11 +1,12 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { convertToEnglishDigits } from "../utils/convertToEnglishDigits";
+import { toFaNums } from "../utils/toFaNums";
+import { getLocalData } from "../hooks/getLocalData";
 
-const Book = ({ content, currentPageNumber, setCurrentPageNumber }) => {
+const Book = ({ bookName, content, currentPageNumber, setCurrentPageNumber }) => {
   const sections = useMemo(() => {
     return content.map(({ id, content }) => {
-      const persianNumberFormat = new Intl.NumberFormat("fa-IR");
-      const pageNumber = persianNumberFormat.format(id);
+      const pageNumber = toFaNums(id);
       return (
         <section key={id} id={`page${id}`} className="page">
           <div>{`صفحه ${pageNumber}`}</div>
@@ -39,25 +40,40 @@ const Book = ({ content, currentPageNumber, setCurrentPageNumber }) => {
     goToPage(newPage);
   }
 
-  function handlePageChange(e) {
+  function onInputRange(e) {
+    const inputPage = e.target.value;
+    goToPage(+inputPage);
+  }
+
+  function onInputNumber(e) {
     const inputEl = e.target;
-    let newPageNumber = +convertToEnglishDigits(e.target.value);
+    const newPageNumber = convertToEnglishDigits(inputEl.value);
     const max = content.length;
-    if (newPageNumber > max || isNaN(newPageNumber)) {
+    if (newPageNumber === "0" || isNaN(newPageNumber) || +newPageNumber > max) {
       inputEl.value = inputEl.value.slice(0, -1);
       inputEl.style.backgroundColor = "rgb(255, 124, 124)";
       setTimeout(() => {
         inputEl.style.backgroundColor = "white";
       }, 300);
     } else {
-      setCurrentPageNumber(newPageNumber);
-      const pageElement = document.getElementById(`page${newPageNumber}`);
-      pageElement?.scrollIntoView();
+      goToPage(newPageNumber);
     }
   }
 
-  function onFocus(e) {}
-  function onBlur(e) {}
+  let onFocusPageNumber = useRef(currentPageNumber);
+  function onFocus(e) {
+    onFocusPageNumber.current = currentPageNumber;
+    e.target.select();
+  }
+
+  function onBlur(e) {
+    const value = e.target.value.trim();
+    value === "" && goToPage(onFocusPageNumber.current);
+  }
+
+  useEffect(() => {
+    goToPage(getLocalData(bookName, 1));
+  }, [bookName]);
 
   return (
     <>
@@ -77,15 +93,22 @@ const Book = ({ content, currentPageNumber, setCurrentPageNumber }) => {
               min="1"
               max={content.length}
               step="1"
-              value={currentPageNumber}
-              onChange={handlePageChange}
+              value={
+                currentPageNumber === 0 || currentPageNumber === ""
+                  ? onFocusPageNumber.current // can be 1 maybe
+                  : currentPageNumber
+              }
+              onChange={onInputRange}
             />
+
             <input
               id="PageInputNumber"
               type="text"
-              value={currentPageNumber}
-              onChange={handlePageChange}
               inputMode="numeric"
+              value={currentPageNumber === 0 ? "" : toFaNums(currentPageNumber)}
+              onChange={onInputNumber}
+              onFocus={onFocus}
+              onBlur={onBlur}
             />
           </div>
         </div>

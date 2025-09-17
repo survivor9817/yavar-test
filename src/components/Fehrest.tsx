@@ -110,6 +110,7 @@ const Fehrest = ({ style, onClose, onChange, bookName, fehrest, setCurrentPageNu
       if (!refPageTitle) return;
       const relatedPage = document.querySelector(`#page${refPageTitle.dataset.refPage}`);
       if (!relatedPage) return;
+      // setCurrentPageNumber(refPageTitle.dataset.refPage);
       relatedPage.scrollIntoView();
     }
 

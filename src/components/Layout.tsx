@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import SidebarBtn from "./SidebarBtn";
 import TabBtn from "./TabBtn";
@@ -10,12 +10,13 @@ import Book from "./Book";
 import Quiz from "./Quiz";
 import Yavar from "./Yavar";
 import { booksData } from "../data/booksData.js";
+import { useLocalStorage } from "../hooks/useLocalStorage.ts";
 
 const Layout = () => {
-  const [activeTab, setActiveTab] = useState(0);
-  const [isFehrestOpen, setIsFehrestOpen] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [wasFehrestOpen, saveFehrestState] = useState(false);
+  const [activeTab, setActiveTab] = useLocalStorage("activeTab", 0);
+  const [isFehrestOpen, setIsFehrestOpen] = useLocalStorage("isFehrestOpen", false);
+  const [isMenuOpen, setIsMenuOpen] = useLocalStorage("isMenuOpen", false);
+  const [wasFehrestOpen, saveFehrestState] = useLocalStorage("wasFehrestOpened", false);
   const isSmallScreen = useMediaQuery("(max-width: 1440px)");
 
   const styles = {
@@ -62,15 +63,14 @@ const Layout = () => {
     setActiveTab(2);
   }
 
-  const [currentBookName, setCurrentBookName] = useState(Object.keys(booksData)[0]);
-  const [currentBook, setCurrentBook] = useState(booksData[currentBookName]);
-  const [currentPageNumber, setCurrentPageNumber] = useState(1);
+  const bookOption = Object.keys(booksData)[0];
+  const [currentBookName, setCurrentBookName] = useLocalStorage("lastBookRead", bookOption);
+  const currentBook = useMemo(() => booksData[currentBookName], [currentBookName]);
+  const [currentPageNumber, setCurrentPageNumber] = useLocalStorage(currentBookName, 1);
 
   function updateBook(event) {
     const newBookName = event.target.value;
     setCurrentBookName(newBookName);
-    setCurrentBook(booksData[newBookName]);
-    setCurrentPageNumber(1);
   }
 
   return (
@@ -102,6 +102,7 @@ const Layout = () => {
 
         <div className="tabs" style={styles.tabsContainer}>
           <Book
+            bookName={currentBookName}
             content={currentBook.content}
             currentPageNumber={currentPageNumber}
             setCurrentPageNumber={setCurrentPageNumber}
