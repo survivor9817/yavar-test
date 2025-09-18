@@ -98,10 +98,9 @@ const Fehrest = ({ style, onClose, onChange, bookName, fehrest, setCurrentPageNu
       if (observerRef.current) {
         pagesToWatch.forEach((page) => observerRef.current.unobserve(page));
         observerRef.current.disconnect();
-        console.log("Observer disconnected");
       }
     };
-  }, [fehrest, observerCallback]); // وقتی fehrest تغییر کنه دوباره راه‌اندازی شه
+  }, [fehrest, observerCallback]);
 
   // مدیریت کلیک روی فهرست
   useEffect(() => {
@@ -110,7 +109,6 @@ const Fehrest = ({ style, onClose, onChange, bookName, fehrest, setCurrentPageNu
       if (!refPageTitle) return;
       const relatedPage = document.querySelector(`#page${refPageTitle.dataset.refPage}`);
       if (!relatedPage) return;
-      // setCurrentPageNumber(refPageTitle.dataset.refPage);
       relatedPage.scrollIntoView();
     }
 

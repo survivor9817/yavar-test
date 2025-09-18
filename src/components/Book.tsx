@@ -4,7 +4,7 @@ import { toFaNums } from "../utils/toFaNums";
 import { getLocalData } from "../hooks/getLocalData";
 
 const Book = ({ bookName, content, currentPageNumber, setCurrentPageNumber }) => {
-  const sections = useMemo(() => {
+  const renderedPages = useMemo(() => {
     return content.map(({ id, content }) => {
       const pageNumber = toFaNums(id);
       return (
@@ -29,6 +29,10 @@ const Book = ({ bookName, content, currentPageNumber, setCurrentPageNumber }) =>
     pageElement && pageElement.scrollIntoView();
   }
 
+  useEffect(() => {
+    goToPage(getLocalData(bookName, 1));
+  }, [bookName]);
+
   function goToPrevPage() {
     const newPage = Math.max(1, +currentPageNumber - 1);
     goToPage(newPage);
@@ -42,21 +46,30 @@ const Book = ({ bookName, content, currentPageNumber, setCurrentPageNumber }) =>
 
   function onInputRange(e) {
     const inputPage = e.target.value;
-    goToPage(+inputPage);
+    goToPage(inputPage);
   }
 
   function onInputNumber(e) {
-    const inputEl = e.target;
-    const newPageNumber = convertToEnglishDigits(inputEl.value);
+    const input = e.target;
+    const inputValue = input.value;
+
+    if (inputValue === "") {
+      setCurrentPageNumber("");
+      return;
+    }
+
+    const value = convertToEnglishDigits(inputValue);
     const max = content.length;
-    if (newPageNumber === "0" || isNaN(newPageNumber) || +newPageNumber > max) {
-      inputEl.value = inputEl.value.slice(0, -1);
-      inputEl.style.backgroundColor = "rgb(255, 124, 124)";
+
+    if (value === "0" || isNaN(value) || +value > max) {
+      const previousValue = currentPageNumber === "" ? "" : toFaNums(currentPageNumber);
+      input.value = previousValue;
+      input.style.backgroundColor = "rgb(255, 124, 124)";
       setTimeout(() => {
-        inputEl.style.backgroundColor = "white";
+        input.style.backgroundColor = "white";
       }, 300);
     } else {
-      goToPage(newPageNumber);
+      goToPage(value);
     }
   }
 
@@ -70,10 +83,6 @@ const Book = ({ bookName, content, currentPageNumber, setCurrentPageNumber }) =>
     const value = e.target.value.trim();
     value === "" && goToPage(onFocusPageNumber.current);
   }
-
-  useEffect(() => {
-    goToPage(getLocalData(bookName, 1));
-  }, [bookName]);
 
   return (
     <>
@@ -94,7 +103,7 @@ const Book = ({ bookName, content, currentPageNumber, setCurrentPageNumber }) =>
               max={content.length}
               step="1"
               value={
-                currentPageNumber === 0 || currentPageNumber === ""
+                currentPageNumber === "" || currentPageNumber === 0
                   ? onFocusPageNumber.current // can be 1 maybe
                   : currentPageNumber
               }
@@ -105,16 +114,20 @@ const Book = ({ bookName, content, currentPageNumber, setCurrentPageNumber }) =>
               id="PageInputNumber"
               type="text"
               inputMode="numeric"
-              value={currentPageNumber === 0 ? "" : toFaNums(currentPageNumber)}
               onChange={onInputNumber}
               onFocus={onFocus}
               onBlur={onBlur}
+              value={
+                currentPageNumber === "" || currentPageNumber === 0
+                  ? ""
+                  : toFaNums(currentPageNumber)
+              }
             />
           </div>
         </div>
 
         <div id="BookSection" className="book-section">
-          {sections}
+          {renderedPages}
         </div>
       </div>
     </>

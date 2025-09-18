@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import SidebarBtn from "./SidebarBtn";
 import TabBtn from "./TabBtn";
