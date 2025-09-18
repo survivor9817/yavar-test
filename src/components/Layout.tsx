@@ -9,7 +9,7 @@ import TabIndicator from "./TabIndicator";
 import Book from "./Book";
 import Quiz from "./Quiz";
 import Yavar from "./Yavar";
-import { booksData } from "../data/booksData.js";
+import { booksData } from "../data/booksData.ts";
 import { useLocalStorage } from "../hooks/useLocalStorage.ts";
 
 const Layout = () => {
@@ -38,11 +38,11 @@ const Layout = () => {
 
   function toggleFehrest() {
     setActiveTab(0);
-    setIsFehrestOpen((prev) => !prev);
+    setIsFehrestOpen((prev: boolean) => !prev);
   }
 
   function toggleMenu() {
-    setIsMenuOpen((prev) => !prev);
+    setIsMenuOpen((prev: boolean) => !prev);
   }
 
   function goToBook() {
@@ -68,7 +68,7 @@ const Layout = () => {
   const currentBook = useMemo(() => booksData[currentBookName], [currentBookName]);
   const [currentPageNumber, setCurrentPageNumber] = useLocalStorage(currentBookName, 1);
 
-  function updateBook(event) {
+  function updateBook(event: React.ChangeEvent<HTMLSelectElement>) {
     const newBookName = event.target.value;
     setCurrentBookName(newBookName);
   }

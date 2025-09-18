@@ -12,10 +12,7 @@ const Book = ({ bookName, content, currentPageNumber, setCurrentPageNumber }) =>
           <div>{`صفحه ${pageNumber}`}</div>
           <div>
             <p>{content}</p>
-            <p>{content}</p>
-            <p>{content}</p>
-            <p>{content}</p>
-            <p>{content}</p>
+            <img src="" alt="" width={"700px"} height={"600px"} />
           </div>
         </section>
       );
