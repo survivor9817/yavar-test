@@ -1,28 +1,79 @@
 import { useState } from "react";
 import { options } from "../data/filterOptionsData";
-import FilterCriteria from "./FilterCriteria";
+import FilterSelector from "./FilterSelector";
 
 const Quiz = () => {
   const [quizStatus, setQuizStatus] = useState("off");
-  function startQuiz(formData) {
-    console.log(formData.get("Where"));
+  const [filterHeight, setFilterHeight] = useState("130px");
+  const [isBtnVisible, setIsBtnVisible] = useState(false);
+  const [filtersData, setFiltersData] = useState({
+    Where: "",
+    Level: "",
+    Source: "",
+  });
+
+  const filterHeights = {
+    first: "130px",
+    Where: "214px",
+    Level: "300px",
+    Source: "320px",
+  };
+
+  function handleChange(event) {
+    const value = event.target.value;
+    const id = event.target.id;
+
+    setFiltersData({ ...filtersData, [id]: value });
+
+    if (parseInt(filterHeights[id]) > parseInt(filterHeight)) {
+      setFilterHeight(filterHeights[id]);
+    }
+
+    if (id === "Source") {
+      setIsBtnVisible(true);
+    }
   }
 
+  function startQuiz(formData) {
+    console.log(formData.get("Where"));
+    setIsBtnVisible(false);
+    setFilterHeight("130px");
+    setQuizStatus("on");
+    setFiltersData({
+      Where: "",
+      Level: "",
+      Source: "",
+    });
+  }
   return (
     <>
       <div id="ExerciseTabContainer" className="tab-container">
         {/* <!-- filter section --> */}
         <form className="filter-section" action={startQuiz}>
-          <div className="exercise-filters">
-            <FilterCriteria
+          <div className="exercise-filters" style={{ height: filterHeight }}>
+            <FilterSelector
               id={"Where"}
               label={"از کجای کتاب تمرین می‌خوای؟"}
-              data={options.Where}
+              value={filtersData.Where}
+              onChange={handleChange}
+              options={options.Where}
             />
-            <FilterCriteria id={"Level"} label={"در چه سطحی باشند؟"} data={options.Level} />
-            <FilterCriteria id={"Source"} label={"از چه منبعی باشند؟"} data={options.Source} />
+            <FilterSelector
+              id={"Level"}
+              label={"در چه سطحی باشند؟"}
+              value={filtersData.Level}
+              onChange={handleChange}
+              options={options.Level}
+            />
+            <FilterSelector
+              id={"Source"}
+              label={"از چه منبعی باشند؟"}
+              value={filtersData.Source}
+              onChange={handleChange}
+              options={options.Source}
+            />
           </div>
-          <div className="btn-container" data-step="4">
+          <div className={`btn-container ${isBtnVisible ? "btn-visible" : null}`}>
             <button type="submit" className="start-exercise-btn">
               <span>شروع تمرین</span>
             </button>
